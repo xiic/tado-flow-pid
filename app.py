@@ -21,6 +21,7 @@ PARAM_KI = float(os.getenv('PARAM_KI', 0.03))
 PARAM_KD = float(os.getenv('PARAM_KD', 0.0))
 PARAM_KPOM = float(os.getenv('PARAM_KPOM', 10.0))
 PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.05))
+PARAM_POM_FADE = float(os.getenv('PARAM_POM_FADE', 0.001))
 
 temperature_offset = 0.5 # "Disable" Tado control algorithm
 flow_max_update_interval = timedelta(hours=1)
@@ -42,11 +43,11 @@ def main():
 
         # Create or update a controller for each zone
         for zone in zoneStates:
-            # Only execute for this zone if setting power is not OFF:
             if zone['setting']['power'] == 'OFF':
-                continue
+                setpoint = 0
+            else:
+                setpoint = zone['setting']['temperature']['value'] - temperature_offset
             
-            setpoint = zone['setting']['temperature']['value'] - temperature_offset
             current = zone['sensorDataPoints']['insideTemperature']['value']
             id = zone['id']
             name = zone['name']
@@ -70,7 +71,7 @@ def main():
             tado.set_flow_temperature_optimization(max_output_rounded)
             flow = max_output_rounded
         
-        time.sleep(60)
+        time.sleep(90)
 
 def create_new_controller(name, setpoint, flow):
     return FlowController(name = name,
@@ -79,6 +80,7 @@ def create_new_controller(name, setpoint, flow):
                           Kd = PARAM_KD,
                           Kpom = PARAM_KPOM,
                           weightPom = PARAM_POM_WEIGHT,
+                          fadePom= PARAM_POM_FADE,
                           setpoint = setpoint,
                           output_limits=(FLOW_MIN, flow_max),
                           starting_output=flow)

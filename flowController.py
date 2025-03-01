@@ -3,7 +3,7 @@ from PyTado.interface.interface import Tado
 from simple_pid import PID
 
 class FlowController:
-    def __init__(self, name, Kp, Ki, Kd, Kpom, weightPom, setpoint, output_limits, starting_output):
+    def __init__(self, name, Kp, Ki, Kd, Kpom, weightPom, fadePom, setpoint, output_limits, starting_output):
         self.name = name
         self.output = starting_output
         self.pid = PID(Kp=Kp,
@@ -11,6 +11,7 @@ class FlowController:
                        Kd=Kd,
                        Kpom=Kpom,
                        weightPom=weightPom,
+                       fadePom=fadePom,
                        setpoint=setpoint,
                        sample_time=None,
                        output_limits=output_limits,
