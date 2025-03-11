@@ -33,6 +33,8 @@ pickle_file = './data/tado_http.pkl'
 
 def main():
     """Adjust the flow temperature to control the room temperature"""
+    global flow_max
+    
     tado = Tado()
 
     # TODO: Nicer way of storing session. Data directory consistent between docker and running direct
@@ -46,8 +48,7 @@ def main():
     
     tado_auth(tado)
 
-    flow_max = tado.get_flow_temperature_optimization()['maxFlowTemperature']
-    flow = flow_max # Start with the flow temperature currently set in Tado
+    flow = tado.get_flow_temperature_optimization()['maxFlowTemperature']
     controllers = {}
 
     while True:
@@ -92,6 +93,10 @@ def main():
                 tado.set_flow_temperature_optimization(max_output_rounded)
                 flow = max_output_rounded
             
+            # Pickle session and store to data directory
+            with open(pickle_file, 'wb') as f:
+                pickle.dump(tado._http, f, protocol=pickle.HIGHEST_PROTOCOL)
+
             time.sleep(90) # sleep 90s (more frequent updates might cause issues)
         except Exception as e:
             print(f"Error: {e}")
@@ -113,10 +118,6 @@ def tado_auth(tado: Tado):
         raise 'Device activation failed'
 
     print('_refresh_token' + tado._http._token_refresh)
-    
-    # Pickle session and store to ../data/tado_session.pkl
-    with open(pickle_file, 'wb') as f:
-        pickle.dump(tado._http, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     print('Activation completed.')
 
@@ -127,6 +128,8 @@ def tado_wait_activation_start(tado: Tado):
         time.sleep(30)
 
 def create_new_controller(name, setpoint, flow):
+    global flow_max
+
     return FlowController(name = name,
                           Kp = PARAM_KP,
                           Ki = PARAM_KI,
