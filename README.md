@@ -26,3 +26,9 @@ python -m pip install -r ./requirements.txt
 python src/app.py
 ```
 
+# Development (Windows)
+## HTTP Toolkit
+Add httptoolkit CA to venv truststore:
+```
+Get-Content $env:LOCALAPPDATA\httptoolkit\Config\ca.pem | Add-Content .\venv\Lib\site-packages\certifi\cacert.pem
+```

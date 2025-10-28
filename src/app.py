@@ -3,7 +3,6 @@
 import os
 import sys
 import time
-import pickle
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
@@ -29,26 +28,18 @@ flow_max_update_interval = timedelta(hours=1)
 flow_max_last_update = datetime.min
 flow_max = None
 
-pickle_file = './data/tado_http.pkl'
+token_file_path = './data/refresh_token'
 
 def main():
     """Adjust the flow temperature to control the room temperature"""
     global flow_max
     
-    tado = Tado()
-
-    # TODO: Nicer way of storing session. Data directory consistent between docker and running direct
-
-    # read file only if it exists:
-    if os.path.exists(pickle_file):
-        with open(pickle_file, 'rb') as f:
-            pickled_http = pickle.load(f)
-        tado._http = pickled_http
-        tado._api = API.TadoX(http=pickled_http)
-    
+    tado = Tado(token_file_path)  
     tado_auth(tado)
 
-    flow = tado.get_flow_temperature_optimization()['maxFlowTemperature']
+    tado.set_flow_temperature_optimization(31)
+
+    flow = tado.get_flow_temperature_optimization().max_flow_temperature
     controllers = {}
 
     while True:
@@ -64,15 +55,15 @@ def main():
             zoneStates = tado.get_zone_states()
 
             # Create or update a controller for each zone
-            for zone in zoneStates:
-                if zone['setting']['power'] == 'OFF':
+            for zone_id, zone_data in zoneStates.items():
+                if zone_data.setting.power == 'OFF':
                     setpoint = frost_protection
                 else:
-                    setpoint = zone['setting']['temperature']['value'] - temperature_offset
+                    setpoint = zone_data.setting.temperature.value - temperature_offset
                 
-                current = zone['sensorDataPoints']['insideTemperature']['value']
-                id = zone['id']
-                name = zone['name']
+                current = zone_data.sensor_data_points.inside_temperature.value
+                id = zone_data.id
+                name = zone_data.name
 
                 # Initialize controller in controllers identified by id if it does not exist
                 if id not in controllers:
@@ -92,10 +83,6 @@ def main():
                 print(f"Setting flow to: {max_output_rounded}")
                 tado.set_flow_temperature_optimization(max_output_rounded)
                 flow = max_output_rounded
-            
-            # Pickle session and store to data directory
-            with open(pickle_file, 'wb') as f:
-                pickle.dump(tado._http, f, protocol=pickle.HIGHEST_PROTOCOL)
 
             time.sleep(90) # sleep 90s (more frequent updates might cause issues)
         except Exception as e:
@@ -152,7 +139,7 @@ def get_flow_max(tado):
         return flow_max
     
     flow_max_last_update = datetime.now()
-    outsideTemperature = tado.get_weather()['outsideTemperature']['celsius']
+    outsideTemperature = tado.get_weather().outside_temperature.celsius
 
     a_x = -10
     a_y = FLOW_MAX_MINUS10

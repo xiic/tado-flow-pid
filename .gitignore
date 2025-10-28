@@ -170,3 +170,4 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 /data/*.pkl
+/data/refresh_token
