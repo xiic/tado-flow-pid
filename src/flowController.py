@@ -22,6 +22,9 @@ class FlowController:
         self.current = current
         self.output = self.pid(current)
     
+    def set_output_limits(self, output_limits):
+        self.pid.output_limits = output_limits
+    
     def __repr__(self):
         components = self.pid.components
         p = components[0]
