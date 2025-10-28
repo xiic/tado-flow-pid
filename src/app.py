@@ -37,8 +37,6 @@ def main():
     tado = Tado(token_file_path)  
     tado_auth(tado)
 
-    tado.set_flow_temperature_optimization(31)
-
     flow = tado.get_flow_temperature_optimization().max_flow_temperature
     controllers = {}
 
