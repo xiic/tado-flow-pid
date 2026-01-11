@@ -6,7 +6,7 @@ It cannot really change the algorithm, but it controls the flow temperatur in a 
 ### Requirements:
 * You need a tado premium subscription (aka "AI Assist")
 * You need to be able to control the "Flow Temperature" (Vorlauftemperatur/Aanvoertemperatuur). Check the app if you see this in the settings (usually present if tado is connected using OpenTherm).
-* Disable "Adaptive Heating" in the tado app
+* Disable "Automated optimization" of the flow temperature in the tado app
 
 ## Run on docker
 1. Create a `docker-compose.yml` file:
