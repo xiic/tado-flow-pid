@@ -1,26 +1,34 @@
 """Control the tado flowTemperature using PyTado"""
 
 import os
+import logging
 import sys
 import time
 from datetime import datetime, timedelta
 
 from dotenv import load_dotenv
-from PyTado.interface.interface import Tado, API
+from PyTado.interface.interface import Tado
 from PyTado.http import DeviceActivationStatus
 from flowController import FlowController
 
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler(sys.stdout)]
+)
+logger = logging.getLogger(__name__)
+
 FLOW_MIN = float(os.getenv('FLOW_MIN', 20))
-FLOW_MAX_MINUS10 = float(os.getenv('FLOW_MAX_MINUS10', 75))
-FLOW_MAX_PLUS20 = float(os.getenv('FLOW_MAX_PLUS20', 45))
+FLOW_MAX_MINUS10 = float(os.getenv('FLOW_MAX_MINUS10', 70))
+FLOW_MAX_PLUS20 = float(os.getenv('FLOW_MAX_PLUS20', 40))
 PARAM_KP = float(os.getenv('PARAM_KP', 0.0))
 PARAM_KI = float(os.getenv('PARAM_KI', 0.02))
 PARAM_KD = float(os.getenv('PARAM_KD', 0.0))
-PARAM_KPOM = float(os.getenv('PARAM_KPOM', 10.0))
-PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.05))
-PARAM_POM_FADE = float(os.getenv('PARAM_POM_FADE', 0.001))
+PARAM_KPOM = float(os.getenv('PARAM_KPOM', 6.0))
+PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.04))
+PARAM_POM_FADE = float(os.getenv('PARAM_POM_FADE', 0.004))
 
 temperature_offset = 0.5 # "Disable" Tado control algorithm
 frost_protection = 5.0 # Minimum temperature to prevent frost
@@ -74,42 +82,41 @@ def main():
             max_output_rounded = round(max_output)
 
             # Print representation of all controllers in one line concatenated with |
-            print(" | ".join([str(controller) for controller in controllers.values()]))
+            logger.info(" | ".join([str(controller) for controller in controllers.values()]))
 
             # Update flow temperature optimization if necessary
             if max_output_rounded != flow:
-                print(f"Setting flow to: {max_output_rounded}")
+                logger.info(f"Setting flow to: {max_output_rounded}")
                 tado.set_flow_temperature_optimization(max_output_rounded)
                 flow = max_output_rounded
 
             time.sleep(90) # sleep 90s (more frequent updates might cause issues)
         except Exception as e:
-            print(f"Error: {e}")
+            logger.error(f"Error: {e}")
             time.sleep(600)
 
 def tado_auth(tado: Tado):
     if (tado.device_activation_status() == DeviceActivationStatus.COMPLETED):
-        print('Already activated.')
+        logger.info('Already activated.')
         return
     
     if (tado.device_activation_status() == DeviceActivationStatus.NOT_STARTED):
+        logger.info('Starting tado activation...')
         tado_wait_activation_start(tado)
     
     if (tado.device_activation_status() == DeviceActivationStatus.PENDING):
-        print(f'Activation pending, please verify: {tado.device_verification_url()}')
+        logger.info(f'Activation pending, please verify: {tado.device_verification_url()}')
         tado.device_activation() # Wait for activation
     
     if (tado.device_activation_status() != DeviceActivationStatus.COMPLETED):
         raise 'Device activation failed'
 
-    print('_refresh_token' + tado._http._token_refresh)
-
-    print('Activation completed.')
+    logger.info('Activation completed.')
 
 def tado_wait_activation_start(tado: Tado):
     while (tado.device_activation_status() == DeviceActivationStatus.NOT_STARTED):
         # Should never occur (at least if a fast internet connection is present)
-        print('Activation not started yet, retrying in 30s...')
+        logger.warning('Activation not started yet, retrying in 30s...')
         time.sleep(30)
 
 def create_new_controller(name, setpoint, flow):
@@ -150,7 +157,7 @@ def get_flow_max(tado):
     if flow > FLOW_MAX_MINUS10:
         return FLOW_MAX_MINUS10
     
-    print(f"Calculated flow max: {flow}")
+    logger.info(f"Calculated flow max: {flow}")
     return round(flow)
 
 if __name__ == "__main__":

@@ -1,3 +1,7 @@
 python-dotenv
-git+https://github.com/xiic/PyTado.git@master#egg=python-tado
-git+https://github.com/xiic/extended-pid.git@feat/extended-pid#egg=simple-pid
+
+# git+https://github.com/xiic/PyTado.git@master#egg=python-tado
+git+https://github.com/wmalgadey/PyTado.git@master#egg=python-tado
+
+# git+https://github.com/xiic/extended-pid.git@feat/extended-pid#egg=simple-pid
+git+https://github.com/xiic/extended-pid.git@d7cd6256c78d6e03a7b98366004b5422e9303b56#egg=simple-pid
