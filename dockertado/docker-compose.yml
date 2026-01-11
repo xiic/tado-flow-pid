@@ -1,0 +1,21 @@
+services:
+  tado-flow-pid:
+    image: xiic/tado-flow-pid:latest
+    restart: unless-stopped
+    environment:
+      # Minimum flow temperature:
+      FLOW_MIN: 20
+      # Maximum flow temperature at -10°C outside temperature; upper limit:
+      FLOW_MAX_MINUS10: 70
+      # Maximum flow temperature at +20°C outside temperature; *lower* limit for the *maximum* calculated flow:
+      FLOW_MAX_PLUS20: 40
+      # Integral gain; increase to make the change quicker (when away from the setpoint):
+      PARAM_KI: 0.02
+      # Proportional-on-measurement gain; increase to make the change *slower* when close to the setpoint:
+      PARAM_KPOM: 6.0
+    volumes:
+      - tado-flow-pid_data:/data
+
+volumes:
+  tado-flow-pid_data:
+    driver: local
