@@ -1,4 +1,5 @@
 from datetime import datetime
+import logging
 from PyTado.interface.interface import Tado
 from simple_pid import PID
 
@@ -32,7 +33,14 @@ class FlowController:
         d = components[2]
         pom = components[3]
 
-        return f"{self.name} {self.current:.2f} {self.pid.setpoint:.2f} {self.output:.2f} [{p:.2f} {i:.2f} {d:.2f} {pom:.2f}]"
-
+        # Get the current log level
+        logger = logging.getLogger()
+        current_level = logger.getEffectiveLevel()
         
+        if current_level <= logging.DEBUG:
+            return f"{self.name} {self.current:.2f} {self.pid.setpoint:.2f} {self.output:.2f} [{p:.2f} {i:.2f} {d:.2f} {pom:.2f}]"
+        else:
+            # Standard representation for INFO level
+            return f"{self.name} {self.current:.2f} {self.pid.setpoint:.2f} {self.output:.2f}"
+  
 

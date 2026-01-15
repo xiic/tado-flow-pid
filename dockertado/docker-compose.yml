@@ -13,6 +13,8 @@ services:
       PARAM_KI: 0.02
       # Proportional-on-measurement gain; increase to make the change *slower* when close to the setpoint:
       PARAM_KPOM: 6.0
+      # DEBUG, INFO
+      LOG_LEVEL: INFO
     volumes:
       - tado-flow-pid_data:/data
 

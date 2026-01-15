@@ -9,12 +9,18 @@ from datetime import datetime, timedelta
 from dotenv import load_dotenv
 from PyTado.interface.interface import Tado
 from PyTado.http import DeviceActivationStatus
+from PyTado.models.pre_line_x import ZoneState
+from PyTado.models.line_x import RoomState
 from flowController import FlowController
 
 load_dotenv()
 
+# Configure logging level from environment variable
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+log_level_value = getattr(logging, log_level, logging.INFO)
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=log_level_value,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[logging.StreamHandler(sys.stdout)]
 )
@@ -62,12 +68,28 @@ def main():
 
             # Create or update a controller for each zone
             for zone_id, zone_data in zoneStates.items():
-                if zone_data.setting.power == 'OFF':
-                    setpoint = frost_protection
+                logger.debug(f"zone_data for zone {zone_id}: {zone_data}")
+
+                if isinstance(zone_data, ZoneState):
+                    # Create a ZoneState object for pre-line X
+                    zone_data_prex: ZoneState = zone_data
+                    current = zone_data_prex.sensor_data_points.inside_temperature.celsius
+                    if zone_data_prex.setting.power == 'OFF':
+                        setpoint = frost_protection
+                    else:
+                        setpoint = zone_data_prex.setting.temperature.celsius - temperature_offset
+                elif isinstance(zone_data, RoomState):
+                    # Create a RoomState object for line X
+                    zone_data_linex: RoomState = zone_data
+                    current = zone_data_linex.sensor_data_points.inside_temperature.value
+                    if zone_data_linex.setting.power == 'OFF':
+                        setpoint = frost_protection
+                    else:
+                        setpoint = zone_data_linex.setting.temperature.value - temperature_offset
                 else:
-                    setpoint = zone_data.setting.temperature.value - temperature_offset
+                    logger.warning(f"Unknown zone data type: {type(zone_data).__name__}")
+                    setpoint = frost_protection
                 
-                current = zone_data.sensor_data_points.inside_temperature.value
                 id = zone_data.id
                 name = zone_data.name
 
@@ -116,7 +138,7 @@ def tado_auth(tado: Tado):
 def tado_wait_activation_start(tado: Tado):
     while (tado.device_activation_status() == DeviceActivationStatus.NOT_STARTED):
         # Should never occur (at least if a fast internet connection is present)
-        logger.warning('Activation not started yet, retrying in 30s...')
+        logger.warning('Activation not started yet (device activation might have been revoked - please reset data)')
         time.sleep(30)
 
 def create_new_controller(name, setpoint, flow):
