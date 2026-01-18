@@ -70,6 +70,11 @@ def main():
             for zone_id, zone_data in zoneStates.items():
                 logger.debug(f"zone_data for zone {zone_id}: {zone_data}")
 
+                # Skip if no inside temperature data
+                if not hasattr(zone_data, 'sensor_data_points') or zone_data.sensor_data_points.inside_temperature is None:
+                    logger.debug(f"Skipping zone {zone_id} (no inside_temperature)");
+                    continue
+
                 if isinstance(zone_data, ZoneState):
                     # Create a ZoneState object for pre-line X
                     zone_data_prex: ZoneState = zone_data
