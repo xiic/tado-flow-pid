@@ -72,7 +72,7 @@ def main():
 
                 # Skip if no inside temperature data
                 if not hasattr(zone_data, 'sensor_data_points') or zone_data.sensor_data_points.inside_temperature is None:
-                    logger.debug(f"Skipping zone {zone_id} (no inside_temperature)");
+                    logger.debug(f"Skipping zone {zone_id} (no inside_temperature)")
                     continue
 
                 if isinstance(zone_data, ZoneState):
