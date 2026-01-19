@@ -3,6 +3,12 @@ Replaces the tado temperature control algorithm by utilizing flow temperature.
 
 It cannot really change the algorithm, but it controls the flow temperatur in a way that it always keeps the temperatur of the room with the (current) highest heat demand exactly 0.5 °C below the value configured in the app. Other rooms are controlled by tado as usual. This means it works best if there is one main room (e. g. living room) that always requires the most heat.
 
+The control algorithm is based on "Proportional on Measurement" as described here: https://archive.ph/o6SAJ (with some additional enhancements to add a weighted factor based on the distance from the target value).
+
+| Before | After |
+|----------------------------------|-------------------------------------|
+| ![Before using tado-flow-pid](images/tado-before.png) | ![After using tado-flow-pid](images/tado-after.png) |
+
 ### Requirements:
 * You need a tado premium subscription (aka "AI Assist")
 * You need to be able to control the "Flow Temperature" (Vorlauftemperatur/Aanvoertemperatuur). Check the app if you see this in the settings (usually present if tado is connected using OpenTherm).
