@@ -97,7 +97,7 @@ def main():
                         setpoint = zone_data_linex.setting.temperature.value - temperature_offset
                 else:
                     logger.warning(f"Unknown zone data type: {type(zone_data).__name__}")
-                    setpoint = frost_protection
+                    continue
 
                 # Initialize controller in controllers identified by id if it does not exist
                 if id not in controllers:
