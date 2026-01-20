@@ -33,7 +33,7 @@ PARAM_KP = float(os.getenv('PARAM_KP', 0.0))
 PARAM_KI = float(os.getenv('PARAM_KI', 0.02))
 PARAM_KD = float(os.getenv('PARAM_KD', 0.0))
 PARAM_KPOM = float(os.getenv('PARAM_KPOM', 6.0))
-PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.04))
+PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.05))
 PARAM_POM_FADE = float(os.getenv('PARAM_POM_FADE', 0.004))
 
 temperature_offset = 0.5 # "Disable" Tado control algorithm
@@ -97,7 +97,7 @@ def main():
                         setpoint = zone_data_linex.setting.temperature.value - temperature_offset
                 else:
                     logger.warning(f"Unknown zone data type: {type(zone_data).__name__}")
-                    setpoint = frost_protection
+                    continue
 
                 # Initialize controller in controllers identified by id if it does not exist
                 if id not in controllers:

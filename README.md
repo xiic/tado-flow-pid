@@ -59,8 +59,8 @@ This library is not affiliated with the tado° GmbH.
 
 ## Publish to Docker Hub
 ```
-docker build -t xiic/tado-flow-pid:0.0.5 -t xiic/tado-flow-pid:latest .
-docker push xiic/tado-flow-pid:0.0.5
+docker build -t xiic/tado-flow-pid:0.0.6 -t xiic/tado-flow-pid:latest .
+docker push xiic/tado-flow-pid:0.0.6
 docker push xiic/tado-flow-pid:latest
 ```
 
