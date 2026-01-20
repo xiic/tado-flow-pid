@@ -79,6 +79,8 @@ def main():
                     # Create a ZoneState object for pre-line X
                     zone_data_prex: ZoneState = zone_data
                     current = zone_data_prex.sensor_data_points.inside_temperature.celsius
+                    id = zone_id
+                    name = f"Zone {zone_id}" # TODO: Is there an API call on pre-x to retrieve zone names?
                     if zone_data_prex.setting.power == 'OFF':
                         setpoint = frost_protection
                     else:
@@ -87,6 +89,8 @@ def main():
                     # Create a RoomState object for line X
                     zone_data_linex: RoomState = zone_data
                     current = zone_data_linex.sensor_data_points.inside_temperature.value
+                    id = zone_data_linex.id
+                    name = zone_data_linex.name
                     if zone_data_linex.setting.power == 'OFF':
                         setpoint = frost_protection
                     else:
@@ -94,9 +98,6 @@ def main():
                 else:
                     logger.warning(f"Unknown zone data type: {type(zone_data).__name__}")
                     setpoint = frost_protection
-                
-                id = zone_data.id
-                name = zone_data.name
 
                 # Initialize controller in controllers identified by id if it does not exist
                 if id not in controllers:
