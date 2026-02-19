@@ -33,6 +33,7 @@ PARAM_KP = float(os.getenv('PARAM_KP', 0.0))
 PARAM_KI = float(os.getenv('PARAM_KI', 0.02))
 PARAM_KD = float(os.getenv('PARAM_KD', 0.0))
 PARAM_KPOM = float(os.getenv('PARAM_KPOM', 6.0))
+POLL_INTERVAL_S = float(os.getenv('POLL_INTERVAL_S', 90))
 PARAM_POM_WEIGHT = float(os.getenv('PARAM_POM_WEIGHT', 0.05))
 PARAM_POM_FADE = float(os.getenv('PARAM_POM_FADE', 0.004))
 
@@ -118,7 +119,7 @@ def main():
                 tado.set_flow_temperature_optimization(max_output_rounded)
                 flow = max_output_rounded
 
-            time.sleep(90) # sleep 90s (more frequent updates might cause issues)
+            time.sleep(POLL_INTERVAL_S) # sleep
         except Exception as e:
             logger.error(f"Error: {e}")
             time.sleep(600)
