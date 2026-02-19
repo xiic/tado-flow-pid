@@ -32,6 +32,8 @@ services:
       PARAM_KI: 0.02
       # Proportional-on-measurement gain; increase to make the change *slower* when close to the setpoint:
       PARAM_KPOM: 6.0
+      # Polling interval in seconds
+      POLL_INTERVAL_S=90
     volumes:
       - tado-flow-pid_data:/data
 
@@ -59,8 +61,8 @@ This library is not affiliated with the tado° GmbH.
 
 ## Publish to Docker Hub
 ```
-docker build -t xiic/tado-flow-pid:0.0.6 -t xiic/tado-flow-pid:latest .
-docker push xiic/tado-flow-pid:0.0.6
+docker build -t xiic/tado-flow-pid:0.0.7 -t xiic/tado-flow-pid:latest .
+docker push xiic/tado-flow-pid:0.0.7
 docker push xiic/tado-flow-pid:latest
 ```
 
